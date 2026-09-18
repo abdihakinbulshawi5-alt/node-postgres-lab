@@ -1,0 +1,13 @@
+{
+  "name": "node-postgres-api",
+  "version": "1.0.0",
+  "description": "Node.js PostgreSQL Docker application",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "pg": "^8.13.1"
+  }
+}
