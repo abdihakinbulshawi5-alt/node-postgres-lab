@@ -1,3 +1,5 @@
+xrequire("dotenv").config();
+
 const express = require("express");
 const { Pool } = require("pg");
 
@@ -99,9 +101,15 @@ app.delete("/users/:id", async (req, res) => {
     res.status(500).json({
       error: "Failed to delete user"
     });
-  }
-});
+}
+  });
 
-app.listen(3000, "0.0.0.0", () => {
-  console.log("App running on port 3000");
-});
+if (require.main === module) {
+  app.listen(3000, () => {
+    console.log("App running on port 3000");
+  });
+
+}
+
+module.exports = app;
+
