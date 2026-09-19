@@ -1,0 +1,38 @@
+name: ci
+ on:
+ push:
+branches:
+  -main
+  -dev
+
+pull-request:
+ branches:
+  -main
+
+jobs:
+test:
+runs-on: ubuntu-latest
+
+steps:
+-name: checkout code
+uses: actions/checkout@v4
+
+
+   -name: setup Node.js
+  uses: action/setup-node@v4
+ with:
+ node-version: 22
+cach: npm
+cache-dependency-path: app/package-lock.json
+
+-name: install dependeceies 
+working-directory: app
+run: npm ci
+
+-name: run tests
+working-directory: app
+run: npm test
+
+
+-name: Build Docker Image
+ run: docker build -t node-postgres-api: ci ./app

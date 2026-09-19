@@ -1,5 +1,4 @@
 services:
-
   app:
     build: ./app
     container_name: node-app
@@ -11,6 +10,8 @@ services:
   db:
     image: postgres:16-alpine
     container_name: postgres-db
+    ports:
+      - "5434:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: mypassword
