@@ -1,38 +1,54 @@
-name: ci
- on:
- push:
-branches:
-  -main
-  -dev
+name: CI
 
-pull-request:
- branches:
-  -main
+on:
+  push:
+    branches:
+      - main
+      - dev
+
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  packages: write
 
 jobs:
-test:
-runs-on: ubuntu-latest
+  test:
+    runs-on: ubuntu-latest
 
-steps:
--name: checkout code
-uses: actions/checkout@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
 
-   -name: setup Node.js
-  uses: action/setup-node@v4
- with:
- node-version: 22
-cach: npm
-cache-dependency-path: app/package-lock.json
+      - name: Install dependencies
+        working-directory: app
+        run: npm ci
 
--name: install dependeceies 
-working-directory: app
-run: npm ci
+      - name: Run tests
+        working-directory: app
+        run: npm test
 
--name: run tests
-working-directory: app
-run: npm test
+      - name: Login to GHCR
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-
--name: Build Docker Image
- run: docker build -t node-postgres-api: ci ./app
+      - name: Build and Push Docker Image
+        if: github.event_name != 'pull_request'
+        uses: docker/build-push-action@v6
+        with:
+          context: ./app
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/node-postgres-api:latest
