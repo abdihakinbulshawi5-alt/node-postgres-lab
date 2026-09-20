@@ -61,8 +61,18 @@ jobs:
           node -e "
           const { Pool } = require('pg');
           const pool = new Pool();
+            host: process.env.DB_HOST,
+            port:
+number(process.env.DB_PORT)
+             user: process.env.DB_USER,
+             password:
+process.env.DB_PASSWORD,
+             database: process.env.DB_NAME
+             });
+
           pool.query(\`
-            CREATE TABLE IF NOT EXISTS users (
+            CREATE TABLE IF NOT EXISTS users
+(
               id SERIAL PRIMARY KEY,
               name TEXT NOT NULL,
               email TEXT NOT NULL
