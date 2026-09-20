@@ -58,35 +58,33 @@ jobs:
       - name: Create users table
         working-directory: app
         run: |
-          node -e "
-          const { Pool } = require('pg');
-          const pool = new Pool();
-            host: process.env.DB_HOST,
-            port:
-Number(process.env.DB_PORT),
-             user: process.env.DB_USER,
-             password:
-process.env.DB_PASSWORD,
-             database: process.env.DB_NAME
-             });
+          node <<'NODE'
+          const { Pool } = require("pg");
 
-          pool.query(\`
-            CREATE TABLE IF NOT EXISTS users
-(
+          const pool = new Pool({
+            host: process.env.DB_HOST,
+            port: Number(process.env.DB_PORT),
+            user: process.env.DB_USER,
+            password: process.env.DB_PASSWORD,
+            database: process.env.DB_NAME
+          });
+
+          pool.query(`
+            CREATE TABLE IF NOT EXISTS users (
               id SERIAL PRIMARY KEY,
               name TEXT NOT NULL,
               email TEXT NOT NULL
             );
-          \`)
+          `)
           .then(() => {
-            console.log('users table created');
+            console.log("users table created");
             return pool.end();
           })
-          .catch(error => {
+          .catch((error) => {
             console.error(error);
             process.exit(1);
           });
-          "
+          NODE
 
       - name: Run tests
         working-directory: app
