@@ -18,6 +18,28 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: mydatabase
+        ports:
+          - 5434:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d mydatabase"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5434
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: mydatabase
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -32,6 +54,29 @@ jobs:
       - name: Install dependencies
         working-directory: app
         run: npm ci
+
+      - name: Create users table
+        working-directory: app
+        run: |
+          node -e "
+          const { Pool } = require('pg');
+          const pool = new Pool();
+          pool.query(\`
+            CREATE TABLE IF NOT EXISTS users (
+              id SERIAL PRIMARY KEY,
+              name TEXT NOT NULL,
+              email TEXT NOT NULL
+            );
+          \`)
+          .then(() => {
+            console.log('users table created');
+            return pool.end();
+          })
+          .catch(error => {
+            console.error(error);
+            process.exit(1);
+          });
+          "
 
       - name: Run tests
         working-directory: app
