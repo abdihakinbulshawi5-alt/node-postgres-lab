@@ -1,0 +1,48 @@
+name: production CD
+
+   on:
+    push:
+    branches:
+      -main
+
+
+   permissions:
+     contents: read
+     packages: write
+
+
+ env:
+   REGISTRY: ghrc.io
+   IMAGE_NAME: ${{ github.repository }}
+
+  jobs:
+
+
+   build-and-push:
+
+
+  runs-on: ubuntu-latest
+
+
+   steps:
+
+    -name: checkout
+     uses: actions/checkout@v4
+
+    -name: login to GHCR
+      uses: docker/login-action@v3
+     with:
+      registry: ${{ env.REGISTRY }}
+      username: ${{ github.actor }}
+      password: ${{ secrets.GITHUB_TOKEN }}
+
+  -name: Build image
+   run: |
+      docker build \
+       -t $REGISTRY/$IMAGE_NAME:${{ github.sha }} \
+      ./app
+
+  -name: push immutable image
+   run:  |
+     docker push \
+      $REGISTRY/$IMAGE_NAME:${{ github.sha }}
